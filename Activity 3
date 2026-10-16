@@ -1,0 +1,137 @@
+1. Sort an Array
+class Solution {
+    public int[] sortArray(int[] nums) {
+        mergeSort(nums, 0, nums.length - 1);
+        return nums;
+    }
+    void mergeSort(int[] nums, int left, int right) {
+        if (left >= right)
+            return;
+        int mid = left + (right - left) / 2;
+        mergeSort(nums, left, mid);
+        mergeSort(nums, mid + 1, right);
+        merge(nums, left, mid, right);
+    }
+    void merge(int[] nums, int left, int mid, int right) {
+        int[] temp = new int[right - left + 1];
+        int i = left, j = mid + 1, k = 0;
+        while (i <= mid && j <= right) {
+            if (nums[i] <= nums[j])
+                temp[k++] = nums[i++];
+            else
+                temp[k++] = nums[j++];
+        }
+        while (i <= mid)
+            temp[k++] = nums[i++];
+        while (j <= right)
+            temp[k++] = nums[j++];
+        for (i = 0; i < temp.length; i++)
+            nums[left + i] = temp[i];
+    }
+}
+
+2. Top K Frequent Elements
+import java.util.*;
+class Solution {
+    public int[] topKFrequent(int[] nums, int k) {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int num : nums) {
+            map.put(num, map.getOrDefault(num, 0) + 1);
+        }
+        PriorityQueue<Integer> pq =
+            new PriorityQueue<>((a, b) ->
+                map.get(a) - map.get(b));
+        for (int num : map.keySet()) {
+            pq.offer(num);
+            if (pq.size() > k) {
+                pq.poll();
+            }
+        }
+        int[] result = new int[k];
+        for (int i = 0; i < k; i++) {
+            result[i] = pq.poll();
+        }
+        return result;
+    }
+}
+
+3. Find Median from Data Stream
+import java.util.*;
+class MedianFinder {
+    PriorityQueue<Integer> small;
+    PriorityQueue<Integer> large;
+    public MedianFinder() {
+        small = new PriorityQueue<>(Collections.reverseOrder());
+        large = new PriorityQueue<>();
+    }
+    public void addNum(int num) {
+        small.offer(num);
+        large.offer(small.poll());
+        if (small.size() < large.size()) {
+            small.offer(large.poll());
+        }
+    }
+    public double findMedian() {
+        if (small.size() > large.size()) {
+            return small.peek();
+        }
+        return ((double) small.peek() + large.peek()) / 2.0;
+    }
+}
+
+4. Course Schedule
+import java.util.*;
+class Solution {
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        List<List<Integer>> graph = new ArrayList<>();
+        int[] indegree = new int[numCourses];
+        for (int i = 0; i < numCourses; i++) {
+            graph.add(new ArrayList<>());
+        }
+        for (int[] p : prerequisites) {
+            graph.get(p[1]).add(p[0]);
+            indegree[p[0]]++;
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+        int count = 0;
+        while (!queue.isEmpty()) {
+            int course = queue.poll();
+            count++;
+            for (int next : graph.get(course)) {
+                indegree[next]--;
+                if (indegree[next] == 0) {
+                    queue.offer(next);
+                }
+            }
+        }
+        return count == numCourses;
+    }
+}
+
+5. Merge Intervals
+import java.util.*;
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        Arrays.sort(intervals, (a, b) ->
+            Integer.compare(a[0], b[0]));
+        List<int[]> result = new ArrayList<>();
+        for (int[] interval : intervals) {
+            if (result.isEmpty() ||
+                result.get(result.size() - 1)[1] < interval[0]) {
+                result.add(interval);
+            } else {
+                result.get(result.size() - 1)[1] =
+                    Math.max(
+                        result.get(result.size() - 1)[1],
+                        interval[1]
+                    );
+            }
+        }
+        return result.toArray(new int[result.size()][]);
+    }
+}
